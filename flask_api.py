@@ -14,8 +14,8 @@ cors = cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Load the PyTorch model
-model = mobilevig.mobilevig_s(num_classes=3)
-model.load_state_dict(torch.load('m_MobileViG_s_50_epoch_0.5_d.pth', map_location=torch.device('cpu'), weights_only=True))
+model = mobilevig.mobilevig_ti(num_classes=3)
+model.load_state_dict(torch.load('m_MobileViG_ti_50_epoch_0.5_d.pth', map_location=torch.device('cpu'), weights_only=False))
 model.eval()  # Set the model to evaluation mode
 
 # Define the image transformation pipeline (resize, normalize, etc.)
@@ -29,7 +29,6 @@ transform = v2.Compose([
 @cross_origin()
 def test():
     return 'FLASK RUNNING'
-
 
 @app.route('/predict', methods=['POST'])
 @cross_origin()
@@ -63,9 +62,9 @@ def predict():
 
         # Build the response
         response = {
-            'Prediction': predicted_class_label.capitalize(),
             'Class': predicted_class_label.capitalize(),
-            'ProbabilityPercentage': predicted_class_probability_percentage
+            'Prediction': predicted_class_label.capitalize(),
+            'Probability': predicted_class_probability_percentage
         }
 
         print(response)
