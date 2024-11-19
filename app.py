@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 import tempfile
-import timm
 
 from flask import Flask, request, jsonify
 from torchvision.transforms import v2
