@@ -1,6 +1,6 @@
 Flask==3.1.0
 Flask_Cors==5.0.0
-distutils
+setuputils
 numpy==1.22.3
 Pillow==9.1.0
 Pillow==11.0.0
