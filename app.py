@@ -33,46 +33,48 @@ def test():
 @cross_origin()
 def predict():
     try:
-        # Check if 'image' is in the request
+        # 1. Pastikan ada file dalam request
         if 'image' not in request.files:
-            return jsonify({'error': 'No image in the request'}), 400
+            return jsonify({'error': 'Tidak ada gambar dalam permintaan'}), 400
 
-        # Save the image temporarily
         image_file = request.files['image']
+        
+        # 2. Pastikan format gambar adalah JPG/JPEG
+        if not image_file.filename.lower().endswith(('.jpg', '.jpeg')):
+            return jsonify({'error': 'Format gambar harus JPG'}), 400
+
+        # 3. Simpan gambar sementara
         temp_image = tempfile.NamedTemporaryFile(delete=False)
         image_file.save(temp_image.name)
 
-        # Open the image and apply transformations
+        # # 4. Buka gambar dan cek ukuran
         img = Image.open(temp_image.name)
-        img = transform(img).unsqueeze(0)  # Add batch dimension
 
-        # Run the image through the model
+        # 5. Lakukan preprocessing
+        img = transform(img).unsqueeze(0)
+
+        # 6. Klasifikasi gambar
         with torch.no_grad():
             outputs = model(img)
             probabilities = torch.softmax(outputs, dim=1).numpy()
 
-        # Define class labels
-        waste_labels = {0: "Benchpress", 1: "Deadlift", 2: "Squat"}
-
-        # Get the predicted class
+        # 7. Ambil hasil prediksi
+        class_labels = {0: "Benchpress", 1: "Deadlift", 2: "Squat"}
         predicted_class_index = np.argmax(probabilities)
-        predicted_class_label = waste_labels[predicted_class_index]
+        predicted_class_label = class_labels[predicted_class_index]
         predicted_class_probability_percentage = "{:.2f}%".format(float(probabilities[0, predicted_class_index]) * 100)
 
-        # Build the response
         response = {
             'Class': predicted_class_label.capitalize(),
             'Prediction': predicted_class_label.capitalize(),
             'Probability': predicted_class_probability_percentage
         }
 
-        print(response)
         return jsonify(response)
 
     except Exception as e:
-        print('An error occurred:', str(e))
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Terjadi kesalahan: {str(e)}'}), 500
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
